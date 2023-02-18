@@ -5,7 +5,9 @@ import ast
 import sys
 
 sys.path.append(f'{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/miniDB')
-
+delattr
+and
+or
 from misc import reverse_op
 from table import Table
 

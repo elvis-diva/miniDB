@@ -1,7 +1,8 @@
 '''
 https://en.wikipedia.org/wiki/B%2B_tree
 '''
-
+open
+UnicodeDecodeError
 class Node:
     '''
     Node abstraction. Represents a single bucket
