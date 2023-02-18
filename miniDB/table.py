@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(f'{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/miniDB')
 
-from misc import get_op, split_condition
+from misc import get_op, split_condition, reverse_op
 
 
 class Table:
@@ -223,6 +223,68 @@ class Table:
             desc: boolean. If True, order_by will return results in descending order (False by default).
             limit: int. An integer that defines the number of rows that will be returned (all rows if None).
         '''
+        if condition is not None:                                                           
+                if "not" in condition.split() or "NOT" in condition.split():
+                    conditlist = condiiton.split("not")
+                    conditlist = condition_list[0].split("NOT")
+                    column_name,operator,value = self._parse_condition(condition_list[1])
+                    column = self.column_by_name(column_name)
+                    #Antistrefoume to operator
+                    op = reverse_op(operator)
+                    rows = [i for i,j in enumerate(column) if get_op(op,j,value)]
+                elif "between" in condition.split() or "BETWEEN" in condition.split():
+                    #Apothikeusi tou condition.split se metavliti
+                    conspl=condition.split()
+                    if (conspl[3] == "and"):
+
+                       left = conspl[2] #H prwti timi pros sygkrisi 
+                       right = conspl[4] #H deyteri timi pros sygkrisi
+                       column_name = conspl[0]
+                       rows = []
+
+                       if (left.isdigit() && right.isdigit()):
+                        #Stin periptwsi pou i sygkrisi einai metaxy arithmwn 
+                           for i,j in enumerate(column):
+                               if int(i) >= left && int(j) <= int(right):
+                                #Prosthetoume ston pinaka tis times gia tis opoies isxuei i synthiki
+                                rows.append(i)
+                       else:
+                        #Metavlites typoy string den mporoume na tis sygkrinoume
+                                    print("To between operator den leitourgei gia strings")
+                                    exit()
+
+                    else:
+                         print("Leipei to and endiamesa apo tous arithmous")
+                         exit()			        
+
+                elif "and" in condition.split() or "AND" in condition.split():
+                     condlist = condiiton.split("and")
+                     condlist = condition_list[0].split("AND")
+                     rows2 = []
+                     for c in condition_list:
+                         #To trexoume gia kathe synthiki
+                         column_name,op,value = self._parse_condition(c)
+                         column = self.column_by_name(column_name)
+                         rows2.append([i for i,j in enumerate(column) if get_op(op,j,value)])
+                     rows = set(rows2[0].intersection(*rows2))
+
+                elif "or" in condition.split() or "OR" in condition.split():
+                      conditlist = condiiton.split("or")
+                      conditlist = condition_list[0].split("OR")
+                      rows2=[]
+                      for c in condition_list:
+                          #To trexoume gia kathe synthiki
+                          column_name,op,value=self._parse_condition(c)
+                          column = self.column_by_name(column_name)
+                          rows2.append([i for i,j in enumerate(column) if get_op(op,j,value)])
+                      rows = []
+                      '''
+                      vazoume tis times tis seiras se monodiastato pinaka
+                      '''
+                      for i in rows2:
+                            for j in i:
+                                if not(j in rows):#gia na apofygoume thn dhmiourgia twn duplicate
+                                   rows.append(j)
 
         # if * return all columns, else find the column indexes for the columns specified
         if return_columns == '*':
